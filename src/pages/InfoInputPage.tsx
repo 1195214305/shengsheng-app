@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '../store/useAppStore'
 
 // 中国主要城市列表
@@ -83,25 +83,30 @@ export default function InfoInputPage() {
   const months = Array.from({ length: 12 }, (_, i) => i + 1)
   const days = Array.from({ length: 31 }, (_, i) => i + 1)
 
+  const stepTitles = ['姓名', '性别', '出生日期', '出生时辰', '出生地点']
+
   const renderStep = () => {
     switch (step) {
       case 0:
         return (
           <motion.div
             key="name"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
           >
-            <h2 className="font-serif text-2xl text-gold-400">请告诉我你的名字</h2>
-            <p className="text-ink-400 text-sm">名字承载着父母的期望与祝福</p>
+            <div className="text-center">
+              <h2 className="text-neutral-200 text-xl mb-2">请告诉我你的名字</h2>
+              <p className="text-neutral-500 text-sm">名字承载着父母的期望与祝福</p>
+            </div>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="输入你的名字"
-              className="input-ink w-full text-lg rounded-sm"
+              className="w-full bg-transparent border-b border-neutral-700 focus:border-amber-500/50 outline-none py-3 text-center text-lg text-neutral-200 placeholder-neutral-600 transition-colors"
               autoFocus
             />
           </motion.div>
@@ -111,35 +116,38 @@ export default function InfoInputPage() {
         return (
           <motion.div
             key="gender"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
           >
-            <h2 className="font-serif text-2xl text-gold-400">你的性别是</h2>
-            <p className="text-ink-400 text-sm">阴阳之道，乾坤有别</p>
-            <div className="flex gap-4">
+            <div className="text-center">
+              <h2 className="text-neutral-200 text-xl mb-2">你的性别是</h2>
+              <p className="text-neutral-500 text-sm">阴阳之道，乾坤有别</p>
+            </div>
+            <div className="flex gap-6 justify-center">
               <button
                 onClick={() => setFormData({ ...formData, gender: 'male' })}
-                className={`flex-1 py-6 rounded-sm border transition-all ${
+                className={`w-28 h-28 rounded-lg border transition-all duration-300 flex flex-col items-center justify-center ${
                   formData.gender === 'male'
-                    ? 'border-gold-500 bg-gold-500/10 text-gold-400'
-                    : 'border-ink-700 hover:border-ink-500 text-ink-300'
+                    ? 'border-amber-500/50 bg-amber-500/10 text-amber-400'
+                    : 'border-neutral-700 hover:border-neutral-600 text-neutral-400'
                 }`}
               >
-                <div className="font-serif text-3xl mb-2">乾</div>
-                <div className="text-sm">男</div>
+                <span className="text-3xl mb-1" style={{ fontFamily: 'STKaiti, KaiTi, serif' }}>乾</span>
+                <span className="text-sm">男</span>
               </button>
               <button
                 onClick={() => setFormData({ ...formData, gender: 'female' })}
-                className={`flex-1 py-6 rounded-sm border transition-all ${
+                className={`w-28 h-28 rounded-lg border transition-all duration-300 flex flex-col items-center justify-center ${
                   formData.gender === 'female'
-                    ? 'border-gold-500 bg-gold-500/10 text-gold-400'
-                    : 'border-ink-700 hover:border-ink-500 text-ink-300'
+                    ? 'border-amber-500/50 bg-amber-500/10 text-amber-400'
+                    : 'border-neutral-700 hover:border-neutral-600 text-neutral-400'
                 }`}
               >
-                <div className="font-serif text-3xl mb-2">坤</div>
-                <div className="text-sm">女</div>
+                <span className="text-3xl mb-1" style={{ fontFamily: 'STKaiti, KaiTi, serif' }}>坤</span>
+                <span className="text-sm">女</span>
               </button>
             </div>
           </motion.div>
@@ -149,42 +157,45 @@ export default function InfoInputPage() {
         return (
           <motion.div
             key="birthdate"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
           >
-            <h2 className="font-serif text-2xl text-gold-400">你的出生日期</h2>
-            <p className="text-ink-400 text-sm">年月日定四柱之三</p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="text-center">
+              <h2 className="text-neutral-200 text-xl mb-2">你的出生日期</h2>
+              <p className="text-neutral-500 text-sm">年月日定四柱之三</p>
+            </div>
+            <div className="flex gap-4 justify-center">
               <select
                 value={formData.birthYear}
                 onChange={(e) => setFormData({ ...formData, birthYear: e.target.value })}
-                className="input-ink rounded-sm"
+                className="bg-neutral-900 border border-neutral-700 rounded px-4 py-3 text-neutral-200 focus:border-amber-500/50 outline-none transition-colors"
               >
                 <option value="">年</option>
                 {years.map(year => (
-                  <option key={year} value={year}>{year}年</option>
+                  <option key={year} value={year}>{year}</option>
                 ))}
               </select>
               <select
                 value={formData.birthMonth}
                 onChange={(e) => setFormData({ ...formData, birthMonth: e.target.value })}
-                className="input-ink rounded-sm"
+                className="bg-neutral-900 border border-neutral-700 rounded px-4 py-3 text-neutral-200 focus:border-amber-500/50 outline-none transition-colors"
               >
                 <option value="">月</option>
                 {months.map(month => (
-                  <option key={month} value={month}>{month}月</option>
+                  <option key={month} value={month}>{month}</option>
                 ))}
               </select>
               <select
                 value={formData.birthDay}
                 onChange={(e) => setFormData({ ...formData, birthDay: e.target.value })}
-                className="input-ink rounded-sm"
+                className="bg-neutral-900 border border-neutral-700 rounded px-4 py-3 text-neutral-200 focus:border-amber-500/50 outline-none transition-colors"
               >
                 <option value="">日</option>
                 {days.map(day => (
-                  <option key={day} value={day}>{day}日</option>
+                  <option key={day} value={day}>{day}</option>
                 ))}
               </select>
             </div>
@@ -195,26 +206,29 @@ export default function InfoInputPage() {
         return (
           <motion.div
             key="birthtime"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
           >
-            <h2 className="font-serif text-2xl text-gold-400">你的出生时辰</h2>
-            <p className="text-ink-400 text-sm">时辰定时柱，一日十二时</p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="text-center">
+              <h2 className="text-neutral-200 text-xl mb-2">你的出生时辰</h2>
+              <p className="text-neutral-500 text-sm">时辰定时柱，一日十二时</p>
+            </div>
+            <div className="grid grid-cols-4 gap-2 max-w-md mx-auto">
               {SHICHEN.map((shi) => (
                 <button
                   key={shi.value}
                   onClick={() => setFormData({ ...formData, birthTime: shi.value })}
-                  className={`py-3 px-2 rounded-sm border transition-all text-center ${
+                  className={`py-3 px-2 rounded border transition-all duration-300 text-center ${
                     formData.birthTime === shi.value
-                      ? 'border-gold-500 bg-gold-500/10 text-gold-400'
-                      : 'border-ink-700 hover:border-ink-500 text-ink-300'
+                      ? 'border-amber-500/50 bg-amber-500/10 text-amber-400'
+                      : 'border-neutral-700 hover:border-neutral-600 text-neutral-400'
                   }`}
                 >
-                  <div className="font-serif text-lg">{shi.label}</div>
-                  <div className="text-xs text-ink-500">{shi.time}</div>
+                  <div className="text-base" style={{ fontFamily: 'STKaiti, KaiTi, serif' }}>{shi.label}</div>
+                  <div className="text-xs text-neutral-500 mt-1">{shi.time}</div>
                 </button>
               ))}
             </div>
@@ -225,14 +239,17 @@ export default function InfoInputPage() {
         return (
           <motion.div
             key="birthplace"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
           >
-            <h2 className="font-serif text-2xl text-gold-400">你的出生地点</h2>
-            <p className="text-ink-400 text-sm">地理方位影响真太阳时</p>
-            <div className="relative">
+            <div className="text-center">
+              <h2 className="text-neutral-200 text-xl mb-2">你的出生地点</h2>
+              <p className="text-neutral-500 text-sm">地理方位影响真太阳时</p>
+            </div>
+            <div className="relative max-w-xs mx-auto">
               <input
                 type="text"
                 value={citySearch || formData.birthPlace}
@@ -242,10 +259,10 @@ export default function InfoInputPage() {
                 }}
                 onFocus={() => setShowCityDropdown(true)}
                 placeholder="搜索或选择城市"
-                className="input-ink w-full rounded-sm"
+                className="w-full bg-transparent border-b border-neutral-700 focus:border-amber-500/50 outline-none py-3 text-center text-lg text-neutral-200 placeholder-neutral-600 transition-colors"
               />
               {showCityDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-ink-900 border border-ink-700 rounded-sm z-10">
+                <div className="absolute top-full left-0 right-0 mt-2 max-h-48 overflow-y-auto bg-neutral-900 border border-neutral-700 rounded z-10">
                   {filteredCities.map(city => (
                     <button
                       key={city}
@@ -254,7 +271,7 @@ export default function InfoInputPage() {
                         setCitySearch('')
                         setShowCityDropdown(false)
                       }}
-                      className="w-full px-4 py-2 text-left hover:bg-ink-800 text-ink-200 transition-colors"
+                      className="w-full px-4 py-2 text-left hover:bg-neutral-800 text-neutral-300 transition-colors"
                     >
                       {city}
                     </button>
@@ -262,8 +279,8 @@ export default function InfoInputPage() {
                 </div>
               )}
             </div>
-            {formData.birthPlace && (
-              <div className="text-gold-400 text-sm">
+            {formData.birthPlace && !showCityDropdown && (
+              <div className="text-center text-amber-400 text-sm">
                 已选择：{formData.birthPlace}
               </div>
             )}
@@ -279,48 +296,63 @@ export default function InfoInputPage() {
     <div className="min-h-screen flex flex-col items-center justify-center relative z-10 px-4">
       {/* 返回按钮 */}
       <motion.button
-        className="absolute top-6 left-6 text-ink-400 hover:text-gold-400 transition-colors"
+        className="absolute top-8 left-8 text-neutral-500 hover:text-amber-400 transition-colors"
         onClick={() => step > 0 ? setStep(step - 1) : navigate('/')}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
         </svg>
       </motion.button>
 
       {/* 步骤指示器 */}
       <motion.div
-        className="absolute top-6 right-6 flex gap-2"
+        className="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        {[0, 1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className={`w-2 h-2 rounded-full transition-all ${
-              i === step ? 'bg-gold-500 w-6' : i < step ? 'bg-gold-500/50' : 'bg-ink-700'
-            }`}
-          />
+        {stepTitles.map((title, i) => (
+          <div key={i} className="flex items-center">
+            <div
+              className={`text-xs transition-colors ${
+                i === step ? 'text-amber-400' : i < step ? 'text-neutral-500' : 'text-neutral-700'
+              }`}
+            >
+              {title}
+            </div>
+            {i < stepTitles.length - 1 && (
+              <div className={`w-8 h-px mx-2 ${i < step ? 'bg-neutral-600' : 'bg-neutral-800'}`} />
+            )}
+          </div>
         ))}
       </motion.div>
 
       {/* 表单内容 */}
-      <div className="w-full max-w-md">
-        {renderStep()}
+      <div className="w-full max-w-lg">
+        <AnimatePresence mode="wait">
+          {renderStep()}
+        </AnimatePresence>
 
         {/* 下一步按钮 */}
-        <motion.button
-          className={`btn-gold w-full mt-8 py-4 rounded-sm font-serif tracking-wider ${
-            !canProceed() ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-          onClick={handleNext}
-          disabled={!canProceed()}
-          whileHover={canProceed() ? { scale: 1.02 } : {}}
-          whileTap={canProceed() ? { scale: 0.98 } : {}}
+        <motion.div
+          className="flex justify-center mt-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
         >
-          {step < 4 ? '继续' : '开始探索'}
-        </motion.button>
+          <button
+            className={`px-12 py-3 border transition-all duration-300 text-sm tracking-widest ${
+              canProceed()
+                ? 'border-neutral-600 text-neutral-300 hover:border-amber-500/50 hover:text-amber-400'
+                : 'border-neutral-800 text-neutral-600 cursor-not-allowed'
+            }`}
+            onClick={handleNext}
+            disabled={!canProceed()}
+          >
+            {step < 4 ? '继续' : '开始探索'}
+          </button>
+        </motion.div>
       </div>
     </div>
   )

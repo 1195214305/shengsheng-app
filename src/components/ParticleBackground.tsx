@@ -10,6 +10,7 @@ interface Particle {
   opacity: number
   life: number
   maxLife: number
+  hue: number
 }
 
 export default function ParticleBackground() {
@@ -21,12 +22,13 @@ export default function ParticleBackground() {
     return {
       x: Math.random() * canvas.width,
       y: canvas.height + 10,
-      size: Math.random() * 3 + 1,
-      speedY: -(Math.random() * 0.5 + 0.2),
-      speedX: (Math.random() - 0.5) * 0.3,
-      opacity: Math.random() * 0.5 + 0.3,
+      size: Math.random() * 2 + 0.5,
+      speedY: -(Math.random() * 0.3 + 0.1),
+      speedX: (Math.random() - 0.5) * 0.2,
+      opacity: Math.random() * 0.4 + 0.1,
       life: 0,
-      maxLife: Math.random() * 500 + 300,
+      maxLife: Math.random() * 600 + 400,
+      hue: 35 + Math.random() * 15, // 金色色调范围
     }
   }, [])
 
@@ -40,7 +42,7 @@ export default function ParticleBackground() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     // 添加新粒子
-    if (particlesRef.current.length < 50 && Math.random() < 0.1) {
+    if (particlesRef.current.length < 40 && Math.random() < 0.05) {
       particlesRef.current.push(createParticle(canvas))
     }
 
@@ -50,25 +52,28 @@ export default function ParticleBackground() {
       particle.y += particle.speedY
       particle.life++
 
+      // 轻微的水平漂移
+      particle.speedX += (Math.random() - 0.5) * 0.01
+
       // 计算透明度（淡入淡出）
       let alpha = particle.opacity
-      if (particle.life < 50) {
-        alpha = (particle.life / 50) * particle.opacity
-      } else if (particle.life > particle.maxLife - 50) {
-        alpha = ((particle.maxLife - particle.life) / 50) * particle.opacity
+      if (particle.life < 80) {
+        alpha = (particle.life / 80) * particle.opacity
+      } else if (particle.life > particle.maxLife - 80) {
+        alpha = ((particle.maxLife - particle.life) / 80) * particle.opacity
       }
 
-      // 绘制粒子 - 金色光点
+      // 绘制粒子 - 暖色光点
       const gradient = ctx.createRadialGradient(
         particle.x, particle.y, 0,
-        particle.x, particle.y, particle.size * 2
+        particle.x, particle.y, particle.size * 3
       )
-      gradient.addColorStop(0, `rgba(212, 163, 92, ${alpha})`)
-      gradient.addColorStop(0.5, `rgba(232, 208, 164, ${alpha * 0.5})`)
-      gradient.addColorStop(1, 'rgba(212, 163, 92, 0)')
+      gradient.addColorStop(0, `hsla(${particle.hue}, 70%, 70%, ${alpha})`)
+      gradient.addColorStop(0.4, `hsla(${particle.hue}, 60%, 60%, ${alpha * 0.5})`)
+      gradient.addColorStop(1, `hsla(${particle.hue}, 50%, 50%, 0)`)
 
       ctx.beginPath()
-      ctx.arc(particle.x, particle.y, particle.size * 2, 0, Math.PI * 2)
+      ctx.arc(particle.x, particle.y, particle.size * 3, 0, Math.PI * 2)
       ctx.fillStyle = gradient
       ctx.fill()
 
@@ -91,10 +96,10 @@ export default function ParticleBackground() {
     window.addEventListener('resize', handleResize)
 
     // 初始化一些粒子
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 20; i++) {
       const particle = createParticle(canvas)
       particle.y = Math.random() * canvas.height
-      particle.life = Math.random() * 200
+      particle.life = Math.random() * 300
       particlesRef.current.push(particle)
     }
 
@@ -114,7 +119,7 @@ export default function ParticleBackground() {
       className="fixed inset-0 pointer-events-none z-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 2 }}
+      transition={{ duration: 3 }}
     />
   )
 }

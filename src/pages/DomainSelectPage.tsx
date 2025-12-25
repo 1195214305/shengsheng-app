@@ -131,7 +131,7 @@ export default function DomainSelectPage() {
     }
 
     setCurrentConversation(newConversation)
-    navigate(`/chat/${domainId}${question ? `?q=${encodeURIComponent(question)}` : ''}`)
+    navigate(`/masters/${domainId}${question ? `?q=${encodeURIComponent(question)}` : ''}`)
   }
 
   // 提交自定义问题
@@ -160,139 +160,145 @@ export default function DomainSelectPage() {
   }
 
   return (
-    <div className="min-h-screen relative z-10 px-4 py-8">
+    <div className="min-h-screen relative z-10 flex flex-col">
       {/* 返回按钮 */}
       <motion.button
-        className="absolute top-6 left-6 text-ink-400 hover:text-gold-400 transition-colors"
+        className="absolute top-8 left-8 text-neutral-500 hover:text-amber-400 transition-colors"
         onClick={() => navigate('/info')}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
         </svg>
       </motion.button>
 
-      {/* 用户信息确认 */}
-      {userInfo && (
+      {/* 主内容区域 */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-20">
+        {/* 用户信息确认 */}
+        {userInfo && (
+          <motion.div
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <p className="text-neutral-400 text-sm">
+              {userInfo.name}，{userInfo.gender === 'male' ? '乾造' : '坤造'}
+            </p>
+            <p className="text-neutral-600 text-xs mt-1">
+              {userInfo.birthDate} {userInfo.birthTime} · {userInfo.birthPlace}
+            </p>
+          </motion.div>
+        )}
+
+        {/* 标题 */}
         <motion.div
-          className="max-w-2xl mx-auto mt-16 mb-8 text-center"
+          className="text-center mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
         >
-          <p className="text-ink-400 text-sm mb-2">
-            {userInfo.name}，{userInfo.gender === 'male' ? '乾造' : '坤造'}
-          </p>
-          <p className="text-ink-500 text-xs">
-            {userInfo.birthDate} {userInfo.birthTime} · {userInfo.birthPlace}
-          </p>
+          <h1 className="text-2xl text-neutral-200 mb-3" style={{ fontFamily: 'STKaiti, KaiTi, serif' }}>
+            选择探索领域
+          </h1>
+          <p className="text-neutral-500 text-sm">你可以选择一个领域深入探讨，或直接描述你的问题</p>
         </motion.div>
-      )}
 
-      {/* 标题 */}
-      <motion.div
-        className="text-center mb-12"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <h1 className="font-serif text-3xl text-gold-400 mb-4">选择探索领域</h1>
-        <p className="text-ink-400">你可以选择一个领域深入探讨，或直接描述你的问题</p>
-      </motion.div>
-
-      {/* 三种选择方式 */}
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* 方式一：骰子随机 */}
+        {/* 骰子和输入框区域 */}
         <motion.div
-          className="card-ink p-6 rounded-sm"
+          className="w-full max-w-xl mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.2 }}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-serif text-lg text-gold-400 mb-1">随机探索</h3>
-              <p className="text-ink-500 text-sm">让命运为你选择一个领域</p>
-            </div>
+          <div className="flex items-center gap-4">
+            {/* 骰子按钮 */}
             <motion.button
-              className={`w-16 h-16 rounded-sm border-2 border-gold-500/50 flex items-center justify-center text-3xl ${
-                isRolling ? 'dice-roll' : ''
+              className={`w-14 h-14 rounded-lg border border-neutral-700 flex items-center justify-center text-2xl hover:border-amber-500/50 transition-colors ${
+                isRolling ? 'animate-pulse' : ''
               }`}
               onClick={handleDiceRoll}
               disabled={isRolling}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              title="随机选择领域"
             >
-              <span className="text-gold-400">
-                {selectedDomain ? DOMAINS.find(d => d.id === selectedDomain)?.icon : '⚅'}
+              <span className="text-amber-400">
+                {selectedDomain && isRolling ? DOMAINS.find(d => d.id === selectedDomain)?.icon : '⚅'}
               </span>
             </motion.button>
+
+            {/* 输入框 */}
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={customQuestion}
+                onChange={(e) => setCustomQuestion(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmitQuestion()}
+                placeholder="描述你的问题，例如：我当前有两份offer，应该如何选择？"
+                className="w-full bg-neutral-900/50 border border-neutral-700 rounded-lg px-4 py-3 text-neutral-200 placeholder-neutral-600 focus:border-amber-500/50 outline-none transition-colors pr-12"
+              />
+              <motion.button
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-neutral-500 hover:text-amber-400 transition-colors"
+                onClick={handleSubmitQuestion}
+                disabled={!customQuestion.trim()}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </motion.button>
+            </div>
           </div>
         </motion.div>
 
-        {/* 方式二：自定义问题 */}
+        {/* 领域卡片网格 */}
         <motion.div
-          className="card-ink p-6 rounded-sm"
+          className="w-full max-w-3xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
         >
-          <h3 className="font-serif text-lg text-gold-400 mb-3">描述你的问题</h3>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={customQuestion}
-              onChange={(e) => setCustomQuestion(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSubmitQuestion()}
-              placeholder="例如：我当前有两份offer，应该如何选择？"
-              className="input-ink flex-1 rounded-sm"
-            />
-            <motion.button
-              className="px-6 py-3 bg-gold-500/20 border border-gold-500/50 text-gold-400 rounded-sm hover:bg-gold-500/30 transition-colors"
-              onClick={handleSubmitQuestion}
-              disabled={!customQuestion.trim()}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </motion.button>
-          </div>
-        </motion.div>
-
-        {/* 方式三：领域卡片 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <h3 className="font-serif text-lg text-gold-400 mb-4 text-center">或选择一个领域</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
             <AnimatePresence>
               {DOMAINS.map((domain, index) => (
                 <motion.button
                   key={domain.id}
-                  className={`card-ink p-6 rounded-sm text-left transition-all ${
-                    selectedDomain === domain.id ? 'border-gold-500' : ''
+                  className={`aspect-square rounded-lg border transition-all duration-300 flex flex-col items-center justify-center ${
+                    selectedDomain === domain.id
+                      ? 'border-amber-500/50 bg-amber-500/10'
+                      : 'border-neutral-800 hover:border-neutral-700 bg-neutral-900/30'
                   }`}
                   onClick={() => enterDomain(domain.id)}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
-                  whileHover={{ scale: 1.02, borderColor: 'rgba(212, 163, 92, 0.5)' }}
-                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 + index * 0.05 }}
+                  whileHover={{ scale: 1.05, borderColor: 'rgba(251, 191, 36, 0.3)' }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <div className="font-calligraphy text-4xl text-gold-400 mb-3">
+                  <span
+                    className="text-3xl text-amber-400/80 mb-2"
+                    style={{ fontFamily: 'STKaiti, KaiTi, serif' }}
+                  >
                     {domain.icon}
-                  </div>
-                  <h4 className="font-serif text-lg text-ink-100 mb-1">{domain.name}</h4>
-                  <p className="text-ink-500 text-xs">{domain.description}</p>
+                  </span>
+                  <span className="text-neutral-400 text-sm">{domain.name}</span>
                 </motion.button>
               ))}
             </AnimatePresence>
           </div>
         </motion.div>
+
+        {/* 底部提示 */}
+        <motion.p
+          className="text-neutral-600 text-xs mt-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          点击骰子随机选择 · 输入问题智能匹配 · 点击卡片直接进入
+        </motion.p>
       </div>
     </div>
   )

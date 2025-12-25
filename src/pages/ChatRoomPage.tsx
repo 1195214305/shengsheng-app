@@ -72,15 +72,23 @@ export default function ChatRoomPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [activeMasters, setActiveMasters] = useState<string[]>(['fang']) // 默认方长老
-  const [showMasterSelect, setShowMasterSelect] = useState(false)
+  const [activeMasters, setActiveMasters] = useState<string[]>(['fang'])
   const [selectedText, setSelectedText] = useState('')
   const [showChaosBox, setShowChaosBox] = useState(false)
   const [currentNodeId, setCurrentNodeId] = useState('root')
   const [baziInfo, setBaziInfo] = useState<ReturnType<typeof calculateBazi> | null>(null)
+  const [showFateTree, setShowFateTree] = useState(true)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
+
+  // 从URL获取选中的宗师
+  useEffect(() => {
+    const mastersParam = searchParams.get('masters')
+    if (mastersParam) {
+      setActiveMasters(mastersParam.split(','))
+    }
+  }, [searchParams])
 
   // 计算八字
   useEffect(() => {
@@ -272,38 +280,60 @@ export default function ChatRoomPage() {
   return (
     <div className="min-h-screen flex relative z-10">
       {/* 左侧：对话区域 */}
-      <div className="flex-1 flex flex-col max-w-3xl">
+      <div className="flex-1 flex flex-col">
         {/* 顶部导航 */}
-        <div className="p-4 border-b border-ink-800 flex items-center justify-between">
+        <div className="h-14 border-b border-neutral-800 flex items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate('/domain')}
-              className="text-ink-400 hover:text-gold-400 transition-colors"
+              onClick={() => navigate(`/masters/${domain}`)}
+              className="text-neutral-500 hover:text-amber-400 transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <div>
-              <h1 className="font-serif text-lg text-gold-400">
+              <h1 className="text-neutral-200 text-sm">
                 {DOMAIN_NAMES[domain || ''] || '对话'}
               </h1>
-              <p className="text-ink-500 text-xs">
+              <p className="text-neutral-600 text-xs">
                 {userInfo.name} · {baziInfo ? formatBazi(baziInfo) : ''}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* 参与宗师 */}
+            <div className="flex items-center gap-1">
+              {activeMasters.map(masterId => {
+                const master = MASTERS.find(m => m.id === masterId)
+                if (!master) return null
+                return (
+                  <div
+                    key={masterId}
+                    className="w-7 h-7 rounded flex items-center justify-center text-sm"
+                    style={{
+                      backgroundColor: `${master.color}20`,
+                      color: master.color,
+                      fontFamily: 'STKaiti, KaiTi, serif'
+                    }}
+                    title={master.name}
+                  >
+                    {master.avatar}
+                  </div>
+                )
+              })}
+            </div>
+
             {/* 小剪刀按钮 */}
             <button
               onClick={toggleScissorsMode}
-              className={`p-2 rounded-sm transition-colors ${
-                scissorsMode ? 'bg-gold-500/20 text-gold-400' : 'text-ink-400 hover:text-gold-400'
+              className={`p-2 rounded transition-colors ${
+                scissorsMode ? 'bg-amber-500/20 text-amber-400' : 'text-neutral-500 hover:text-amber-400'
               }`}
-              title="我还有一些疑问"
+              title="选择文字进行再辨"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="6" cy="6" r="3"/>
                 <circle cx="6" cy="18" r="3"/>
                 <line x1="20" y1="4" x2="8.12" y2="15.88"/>
@@ -315,106 +345,54 @@ export default function ChatRoomPage() {
             {/* 混沌回收箱 */}
             <button
               onClick={() => setShowChaosBox(true)}
-              className="p-2 text-ink-400 hover:text-gold-400 transition-colors"
+              className="p-2 text-neutral-500 hover:text-amber-400 transition-colors"
               title="混沌回收箱"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              </svg>
+            </button>
+
+            {/* 切换推演地图 */}
+            <button
+              onClick={() => setShowFateTree(!showFateTree)}
+              className={`p-2 rounded transition-colors ${
+                showFateTree ? 'text-amber-400' : 'text-neutral-500 hover:text-amber-400'
+              }`}
+              title="命运推演术"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
               </svg>
             </button>
 
             {/* 结束圆桌会 */}
             <button
               onClick={handleEndSession}
-              className="px-3 py-1 text-sm border border-ink-700 text-ink-400 hover:border-gold-500 hover:text-gold-400 rounded-sm transition-colors"
+              className="px-3 py-1.5 text-xs border border-neutral-700 text-neutral-400 hover:border-amber-500/50 hover:text-amber-400 rounded transition-colors"
             >
               结束圆桌会
             </button>
           </div>
         </div>
 
-        {/* 宗师选择 */}
-        <div className="p-4 border-b border-ink-800">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-ink-500 text-sm">参与宗师：</span>
-            <button
-              onClick={() => setShowMasterSelect(!showMasterSelect)}
-              className="text-gold-400 text-sm hover:underline"
-            >
-              {showMasterSelect ? '收起' : '管理'}
-            </button>
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            {MASTERS.filter(m => activeMasters.includes(m.id)).map(master => (
-              <div
-                key={master.id}
-                className="flex items-center gap-2 px-3 py-1 rounded-sm"
-                style={{ backgroundColor: `${master.color}20`, borderLeft: `3px solid ${master.color}` }}
-              >
-                <span className="font-serif text-sm" style={{ color: master.color }}>
-                  {master.avatar}
-                </span>
-                <span className="text-ink-200 text-sm">{master.name}</span>
-              </div>
-            ))}
-          </div>
-
-          <AnimatePresence>
-            {showMasterSelect && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2 overflow-hidden"
-              >
-                {MASTERS.map(master => (
-                  <button
-                    key={master.id}
-                    onClick={() => {
-                      if (activeMasters.includes(master.id)) {
-                        if (activeMasters.length > 1) {
-                          setActiveMasters(activeMasters.filter(id => id !== master.id))
-                        }
-                      } else {
-                        setActiveMasters([...activeMasters, master.id])
-                      }
-                    }}
-                    className={`p-3 rounded-sm border text-left transition-all ${
-                      activeMasters.includes(master.id)
-                        ? 'border-gold-500/50 bg-gold-500/10'
-                        : 'border-ink-700 hover:border-ink-500'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-serif text-lg" style={{ color: master.color }}>
-                        {master.avatar}
-                      </span>
-                      <span className="text-ink-200 text-sm">{master.name}</span>
-                    </div>
-                    <p className="text-ink-500 text-xs">{master.title}</p>
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
         {/* 消息列表 */}
         <div
           ref={chatContainerRef}
-          className={`flex-1 overflow-y-auto p-4 space-y-4 ${scissorsMode ? 'scissors-cursor' : ''}`}
+          className={`flex-1 overflow-y-auto p-4 space-y-4 ${scissorsMode ? 'cursor-crosshair' : ''}`}
           onMouseUp={handleTextSelection}
         >
           {messages.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-ink-500 mb-4">选择一个话题开始对话</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {(RANDOM_TOPICS[domain || 'career'] || []).slice(0, 3).map((topic, index) => (
+            <div className="flex flex-col items-center justify-center h-full">
+              <p className="text-neutral-600 mb-6">选择一个话题开始对话</p>
+              <div className="flex flex-wrap justify-center gap-2 max-w-lg">
+                {(RANDOM_TOPICS[domain || 'career'] || []).slice(0, 4).map((topic, index) => (
                   <button
                     key={index}
                     onClick={() => handleSendMessage(topic)}
-                    className="px-4 py-2 text-sm border border-ink-700 text-ink-300 hover:border-gold-500 hover:text-gold-400 rounded-sm transition-colors"
+                    className="px-4 py-2 text-sm border border-neutral-800 text-neutral-400 hover:border-amber-500/30 hover:text-amber-400 rounded transition-colors"
                   >
                     {topic}
                   </button>
@@ -432,8 +410,8 @@ export default function ChatRoomPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex justify-end"
                 >
-                  <div className="max-w-[80%] px-4 py-3 bg-gold-500/20 border border-gold-500/30 rounded-sm">
-                    <p className="text-ink-100">{message.content}</p>
+                  <div className="max-w-[70%] px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                    <p className="text-neutral-200 text-sm">{message.content}</p>
                   </div>
                 </motion.div>
               )
@@ -447,7 +425,7 @@ export default function ChatRoomPage() {
                   animate={{ opacity: 1 }}
                   className="text-center py-2"
                 >
-                  <p className="text-ink-500 text-sm">{message.content}</p>
+                  <p className="text-neutral-600 text-xs">{message.content}</p>
                 </motion.div>
               )
             }
@@ -460,22 +438,32 @@ export default function ChatRoomPage() {
                 key={message.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="chat-bubble"
-                style={{ borderLeftColor: master.color }}
+                className="flex gap-3"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <span
-                    className="w-8 h-8 rounded-sm flex items-center justify-center font-serif"
-                    style={{ backgroundColor: `${master.color}30`, color: master.color }}
-                  >
-                    {master.avatar}
-                  </span>
-                  <span className="text-ink-300 text-sm">{master.name}</span>
-                  <span className="text-ink-600 text-xs">{master.title}</span>
+                {/* 宗师头像 */}
+                <div
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0"
+                  style={{
+                    backgroundColor: `${master.color}20`,
+                    color: master.color,
+                    fontFamily: 'STKaiti, KaiTi, serif'
+                  }}
+                >
+                  {master.avatar}
                 </div>
-                <p className="text-ink-200 whitespace-pre-wrap leading-relaxed">
-                  {message.content}
-                </p>
+
+                {/* 消息内容 */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-neutral-300 text-sm">{master.name}</span>
+                    <span className="text-neutral-600 text-xs">{master.title}</span>
+                  </div>
+                  <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg px-4 py-3">
+                    <p className="text-neutral-300 text-sm whitespace-pre-wrap leading-relaxed">
+                      {message.content}
+                    </p>
+                  </div>
+                </div>
               </motion.div>
             )
           })}
@@ -484,14 +472,16 @@ export default function ChatRoomPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex items-center gap-2 text-ink-500"
+              className="flex items-center gap-3"
             >
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-gold-500/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 bg-gold-500/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-gold-500/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center">
+                <div className="flex gap-1">
+                  <span className="w-1.5 h-1.5 bg-amber-500/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-amber-500/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-amber-500/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
               </div>
-              <span className="text-sm">宗师正在思考...</span>
+              <span className="text-neutral-600 text-sm">宗师正在思考...</span>
             </motion.div>
           )}
 
@@ -505,22 +495,22 @@ export default function ChatRoomPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="p-4 border-t border-ink-800 bg-ink-900/80"
+              className="p-4 border-t border-neutral-800 bg-neutral-900/80"
             >
-              <p className="text-ink-400 text-sm mb-2">已选中：</p>
-              <p className="text-gold-400 text-sm mb-3 p-2 bg-gold-500/10 rounded-sm">
+              <p className="text-neutral-500 text-xs mb-2">已选中：</p>
+              <p className="text-amber-400 text-sm mb-3 p-2 bg-amber-500/10 rounded border border-amber-500/20">
                 "{selectedText}"
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={handleReDebate}
-                  className="flex-1 py-2 bg-gold-500/20 border border-gold-500/50 text-gold-400 rounded-sm hover:bg-gold-500/30 transition-colors text-sm"
+                  className="flex-1 py-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded hover:bg-amber-500/20 transition-colors text-sm"
                 >
                   引发众师再辨
                 </button>
                 <button
                   onClick={handleAddToChaos}
-                  className="flex-1 py-2 border border-ink-700 text-ink-400 rounded-sm hover:border-ink-500 transition-colors text-sm"
+                  className="flex-1 py-2 border border-neutral-700 text-neutral-400 rounded hover:border-neutral-600 transition-colors text-sm"
                 >
                   放入混沌回收箱
                 </button>
@@ -530,11 +520,11 @@ export default function ChatRoomPage() {
         </AnimatePresence>
 
         {/* 输入区域 */}
-        <div className="p-4 border-t border-ink-800">
-          <div className="flex gap-2 mb-2">
+        <div className="p-4 border-t border-neutral-800">
+          <div className="flex gap-2 mb-3">
             <button
               onClick={handleRandomTopic}
-              className="px-3 py-1 text-xs border border-ink-700 text-ink-400 hover:border-gold-500 hover:text-gold-400 rounded-sm transition-colors"
+              className="px-3 py-1 text-xs border border-neutral-800 text-neutral-500 hover:border-amber-500/30 hover:text-amber-400 rounded transition-colors"
             >
               随机话题
             </button>
@@ -542,7 +532,7 @@ export default function ChatRoomPage() {
               <button
                 onClick={handleGroupDebate}
                 disabled={isLoading}
-                className="px-3 py-1 text-xs border border-gold-500/50 text-gold-400 hover:bg-gold-500/10 rounded-sm transition-colors disabled:opacity-50"
+                className="px-3 py-1 text-xs border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 rounded transition-colors disabled:opacity-50"
               >
                 引发群辨
               </button>
@@ -556,13 +546,13 @@ export default function ChatRoomPage() {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
               placeholder="输入你的问题..."
-              className="input-ink flex-1 rounded-sm"
+              className="flex-1 bg-neutral-900/50 border border-neutral-800 rounded-lg px-4 py-3 text-neutral-200 placeholder-neutral-600 focus:border-amber-500/30 outline-none transition-colors text-sm"
               disabled={isLoading}
             />
             <button
               onClick={() => handleSendMessage()}
               disabled={!inputValue.trim() || isLoading}
-              className="px-6 py-3 bg-gold-500/20 border border-gold-500/50 text-gold-400 rounded-sm hover:bg-gold-500/30 transition-colors disabled:opacity-50"
+              className="px-4 py-3 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-lg hover:bg-amber-500/20 transition-colors disabled:opacity-50"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -573,14 +563,31 @@ export default function ChatRoomPage() {
       </div>
 
       {/* 右侧：命运推演术 */}
-      <div className="hidden lg:block w-96 border-l border-ink-800 p-4">
-        <h2 className="font-serif text-lg text-gold-400 mb-4">命运推演术</h2>
-        <FateTree
-          nodes={currentConversation?.nodes || []}
-          currentNodeId={currentNodeId}
-          onNodeClick={setCurrentNodeId}
-        />
-      </div>
+      <AnimatePresence>
+        {showFateTree && (
+          <motion.div
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 320, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            className="border-l border-neutral-800 overflow-hidden"
+          >
+            <div className="w-80 h-full flex flex-col">
+              <div className="h-14 border-b border-neutral-800 flex items-center px-4">
+                <h2 className="text-neutral-200 text-sm" style={{ fontFamily: 'STKaiti, KaiTi, serif' }}>
+                  命运推演术
+                </h2>
+              </div>
+              <div className="flex-1 p-4 overflow-auto">
+                <FateTree
+                  nodes={currentConversation?.nodes || []}
+                  currentNodeId={currentNodeId}
+                  onNodeClick={setCurrentNodeId}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 混沌回收箱弹窗 */}
       <AnimatePresence>
