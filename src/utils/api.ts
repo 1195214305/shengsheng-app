@@ -1,4 +1,7 @@
-const API_BASE = '/api'
+// 生产环境使用Render后端，开发环境使用本地代理
+const API_BASE = import.meta.env.PROD
+  ? 'https://shengsheng-api.onrender.com/api'
+  : '/api'
 
 interface ChatRequest {
   masterId: string
