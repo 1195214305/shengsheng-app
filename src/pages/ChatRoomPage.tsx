@@ -67,7 +67,7 @@ export default function ChatRoomPage() {
   const { domain } = useParams<{ domain: string }>()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { userInfo, currentConversation, setCurrentConversation, addToChaosBox, scissorsMode, toggleScissorsMode, saveToArchive } = useAppStore()
+  const { userInfo, currentConversation, addToChaosBox, scissorsMode, toggleScissorsMode, saveToArchive } = useAppStore()
 
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
